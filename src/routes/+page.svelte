@@ -2,15 +2,19 @@
     import { onMount } from "svelte";
 
     let transaction: any[] = [];
-    let searchTerm: string = "";
-  
+    let searchTextbox: string = "";
 
-    async function getTransaction() {
-        const response = await fetch("/api/get-transaction");
-        const data = await response.json();
-        transaction = data;
-        console.log(transaction);
-        return data;
+    async function getTransaction(search?: any) {
+        try {
+            let url = "/api/get-transaction";
+            if (search) url += `?search=${search}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            transaction = data;
+            return data;
+        } catch (error) {
+            console.log(error, "error trycatch");
+        }
     }
 
     onMount(() => {
@@ -18,7 +22,7 @@
     });
 
     function handleSearch(event: Event) {
-        searchTerm = (event.target as HTMLInputElement).value.toUpperCase();
+        getTransaction(searchTextbox);
     }
 </script>
 
@@ -27,11 +31,10 @@
     <main class="content">
         <div class="search-bar">
             <input
-                type="text"
+                bind:value={searchTextbox}
                 placeholder="Search Order Id / TX No"
-                on:input={handleSearch}
             />
-            <button type="button">Search</button>
+            <button type="button" on:click={handleSearch}>Search</button>
         </div>
         <section id="content-area">
             <h2>All Transactions</h2>
@@ -48,9 +51,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {#each transaction.filter((trx) => searchTerm === "" || trx.data.attachment.referenceNo
-                                .toUpperCase()
-                                .includes(searchTerm) || trx.data.TX.toUpperCase().includes(searchTerm)) as trx, index}
+                    {#each transaction as trx, index}
                         <tr>
                             <td>{index + 1}</td>
                             <td>{trx.metadata.createdDate}</td>
@@ -59,7 +60,7 @@
                                 >{trx.data.attachment.qris
                                     .retrievalReferenceNo}</td
                             >
-                            <td>{trx.data.attachment.referenceNo}</td>
+                            <td>{trx.data.attachment.orderId}</td>
                             <td>{trx.data.TX}</td>
                             <td>{trx.data.attachment.amountSend}</td>
                         </tr>
@@ -95,7 +96,13 @@
         margin-bottom: 1rem; /* Add some space below the search bar */
     }
 
-    .search-bar input[type="text"] {
+    .search-bar {
+        display: flex; /* Arrange elements horizontally */
+        align-items: center; /* Vertically align content */
+        margin-bottom: 1rem; /* Add some space below the search bar */
+    }
+
+    .search-bar input {
         padding: 0.5rem 1rem; /* Add padding around the input field */
         border: 1px solid #ccc; /* Add a border to the input field */
         border-radius: 4px; /* Round the corners of the input field */
@@ -103,9 +110,23 @@
         font-size: 1rem; /* Set the font size for the input field */
     }
 
-    .search-bar input[type="text"]:focus {
+    .search-bar input:focus {
         outline: none; /* Remove the default outline on focus */
         border-color: #999; /* Change the border color on focus */
+    }
+
+    /* Additional styling for clarity (optional) */
+    .search-bar button {
+        padding: 0.5rem 1rem; /* Add padding around the button */
+        border: 1px solid #ccc; /* Add a border to the button */
+        border-radius: 4px; /* Round the corners of the button */
+        background-color: #f2f2f2; /* Set the background color for the button */
+        cursor: pointer; /* Make the button look clickable */
+        font-size: 1rem; /* Set the font size for the button */
+    }
+
+    .search-bar button:hover {
+        background-color: #ddd; /* Change the background color on hover */
     }
 
     .search-bar button[type="button"] {
