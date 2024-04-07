@@ -3,8 +3,7 @@
 
     let transaction: any[] = [];
     let searchTerm: string = "";
-    let currentPage: number = 1;
-    const itemsPerPage = 5;
+  
 
     async function getTransaction() {
         const response = await fetch("/api/get-transaction");
@@ -29,7 +28,7 @@
         <div class="search-bar">
             <input
                 type="text"
-                placeholder="Search Ref No / TX No"
+                placeholder="Search Order Id / TX No"
                 on:input={handleSearch}
             />
             <button type="button">Search</button>
@@ -43,7 +42,7 @@
                         <th>Created Date</th>
                         <th>Created By</th>
                         <th>Retrieval No</th>
-                        <th>Ref No</th>
+                        <th>Order Id</th>
                         <th>TX No</th>
                         <th>Amount</th>
                     </tr>
