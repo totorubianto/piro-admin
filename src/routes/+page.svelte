@@ -10,11 +10,32 @@
             if (search) url += `?search=${search}`;
             const response = await fetch(url);
             const data = await response.json();
-            transaction = data;
+            // transaction = data;
+            transaction = data.map((item: any) => {
+                if (item.metadata.createdDate) {
+                    item.formattedCreatedDate = formatDate(
+                        item.metadata.createdDate,
+                    );
+                }
+                console.log(item, 'item')
+                return item;
+            });
             return data;
         } catch (error) {
             console.log(error, "error trycatch");
         }
+    }
+
+    function formatDate(timestamp: number) {
+        const date = new Date(timestamp);
+        const year = date.getFullYear().toString().padStart(4, "0"); // Add leading zeros for year
+        const month = date.toLocaleString("id-ID", { month: "short" }); // Get month name in Indonesian (short format)
+        const day = date.getDate().toString().padStart(2, "0"); // Add leading zeros for day
+        const hour = date.getHours().toString().padStart(2, "0"); // Add leading zeros for hour
+        const minute = date.getMinutes().toString().padStart(2, "0"); // Add leading zeros for minute
+        const second = date.getSeconds().toString().padStart(2, "0"); // Add leading zeros for second
+
+        return `${day}-${month}-${year} ${hour}:${minute}:${second}`;
     }
 
     onMount(() => {
@@ -24,6 +45,7 @@
     function handleSearch(event: Event) {
         getTransaction(searchTextbox);
     }
+
 </script>
 
 <h1>PIRO Simple Admin</h1>
@@ -54,7 +76,7 @@
                     {#each transaction as trx, index}
                         <tr>
                             <td>{index + 1}</td>
-                            <td>{trx.metadata.createdDate}</td>
+                            <td>{trx.formattedCreatedDate}</td>
                             <td>{trx.metadata.createdBy.name}</td>
                             <td
                                 >{trx.data.attachment.qris
@@ -62,7 +84,12 @@
                             >
                             <td>{trx.data.attachment.orderId}</td>
                             <td>{trx.data.TX}</td>
-                            <td>{trx.data.attachment.amountSend}</td>
+                            <td
+                                >{trx.data.attachment.amountSend.toLocaleString(
+                                    "id-ID",
+                                    { style: "currency", currency: "IDR" },
+                                )}</td
+                            >
                         </tr>
                     {/each}
                 </tbody>

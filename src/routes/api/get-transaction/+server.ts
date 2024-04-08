@@ -1,5 +1,4 @@
 import admin from "$lib/firebase/firebase.admin";
-import type { RequestEvent } from "@sveltejs/kit";
 
 export async function GET({ url }: any) {
 
@@ -8,8 +7,10 @@ export async function GET({ url }: any) {
     const search = url.searchParams.get('search')
 
     let query: any = firestore.collection('piro_current_account')
-    if (search) query = query.where("data.attachment.orderId", "==", search)
-    query = query.limit(50)
+     if (search) query = query.where("data.attachment.orderId", "==", search)
+    // query = query.where("data.TX", "==", search)
+    query = query.orderBy('metadata.createdDate', 'desc')
+    query = query.limit(100)
 
     const querySnapshot = await query.get();
     const transactions = querySnapshot.docs.map((doc: any) => {
